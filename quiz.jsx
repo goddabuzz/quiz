@@ -96,21 +96,110 @@ function MapView({ items, ps, onPin, hl, fb, gm }) {
   }, [latLonToPixel, offsetX, offsetY]);
 
   const containerRef = useRef(null);
-  const [scale, setScale] = useState(1);
+  const [baseScale, setBaseScale] = useState(1);
+
+  // Pan & zoom state
+  const [userZoom, setUserZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const gestureRef = useRef({ startDist: 0, startZoom: 1, startPan: { x: 0, y: 0 }, startMid: { x: 0, y: 0 }, isPinching: false, lastTap: 0 });
+  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startPan: { x: 0, y: 0 } });
+
+  const clampPan = useCallback((px, py, z) => {
+    const maxPanX = Math.max(0, (W * z - W) / 2);
+    const maxPanY = Math.max(0, (H * z - H) / 2);
+    return { x: Math.max(-maxPanX, Math.min(maxPanX, px)), y: Math.max(-maxPanY, Math.min(maxPanY, py)) };
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
-      setScale(entry.contentRect.width / W);
+      setBaseScale(entry.contentRect.width / W);
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
+  // Reset zoom/pan when question changes (hl or fb changes)
+  useEffect(() => {
+    setUserZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [hl]);
+
+  const dist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  const mid = (t1, t2) => ({ x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 });
+
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const g = gestureRef.current;
+      g.startDist = dist(e.touches[0], e.touches[1]);
+      g.startZoom = userZoom;
+      g.startPan = { ...pan };
+      g.startMid = mid(e.touches[0], e.touches[1]);
+      g.isPinching = true;
+    } else if (e.touches.length === 1 && userZoom > 1) {
+      const d = dragRef.current;
+      d.dragging = true;
+      d.startX = e.touches[0].clientX;
+      d.startY = e.touches[0].clientY;
+      d.startPan = { ...pan };
+    }
+  }, [userZoom, pan]);
+
+  const handleTouchMove = useCallback((e) => {
+    if (e.touches.length === 2 && gestureRef.current.isPinching) {
+      e.preventDefault();
+      const g = gestureRef.current;
+      const newDist = dist(e.touches[0], e.touches[1]);
+      const newZoom = Math.max(1, Math.min(4, g.startZoom * (newDist / g.startDist)));
+      const newMid = mid(e.touches[0], e.touches[1]);
+      const dx = (newMid.x - g.startMid.x) / baseScale;
+      const dy = (newMid.y - g.startMid.y) / baseScale;
+      setUserZoom(newZoom);
+      setPan(clampPan(g.startPan.x + dx, g.startPan.y + dy, newZoom));
+    } else if (e.touches.length === 1 && dragRef.current.dragging) {
+      e.preventDefault();
+      const d = dragRef.current;
+      const dx = (e.touches[0].clientX - d.startX) / baseScale;
+      const dy = (e.touches[0].clientY - d.startY) / baseScale;
+      setPan(clampPan(d.startPan.x + dx, d.startPan.y + dy, userZoom));
+    }
+  }, [baseScale, userZoom, clampPan]);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (e.touches.length < 2) gestureRef.current.isPinching = false;
+    if (e.touches.length === 0) dragRef.current.dragging = false;
+    // Double-tap to reset zoom
+    if (e.touches.length === 0 && e.changedTouches.length === 1) {
+      const now = Date.now();
+      if (now - gestureRef.current.lastTap < 300 && userZoom > 1) {
+        setUserZoom(1);
+        setPan({ x: 0, y: 0 });
+      }
+      gestureRef.current.lastTap = now;
+    }
+  }, [userZoom]);
+
+  const isMobile = baseScale < 0.75;
+  const pinR_base = isMobile ? 15 : 11;
+  const pinR_hl = isMobile ? 18 : 14;
+  const fontSize_base = isMobile ? 12 : 9;
+  const fontSize_hl = isMobile ? 14 : 11;
+
   return (
-    <div ref={containerRef} style={{ position: "relative", width: "100%", overflow: "hidden", borderRadius: 12, background: "#a8d4e6" }}>
-      <div style={{ position: "relative", width: W, height: H, transformOrigin: "0 0", transform: `scale(${scale})` }}>
+    <div ref={containerRef} style={{ position: "relative", width: "100%", overflow: "hidden", borderRadius: 12, background: "#e8f0f8", touchAction: userZoom > 1 ? "none" : "pan-y" }}
+      onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+      {userZoom > 1 && (
+        <div style={{ position: "absolute", top: 6, right: 6, zIndex: 5, display: "flex", gap: 4 }}>
+          <button onClick={() => { setUserZoom(1); setPan({ x: 0, y: 0 }); }}
+            style={{ background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: 8, padding: "4px 8px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Fredoka',sans-serif" }}>
+            {"\u21BA"} Reset zoom
+          </button>
+        </div>
+      )}
+      <div style={{ position: "relative", width: W, height: H, transformOrigin: "0 0", transform: `scale(${baseScale})` }}>
+        <div style={{ width: W, height: H, transformOrigin: `${W/2}px ${H/2}px`, transform: `scale(${userZoom}) translate(${pan.x / userZoom}px, ${pan.y / userZoom}px)` }}>
         {tiles.map(t => (
           <img key={`${t.tx}-${t.ty}`}
             src={`https://basemaps.cartocdn.com/light_nolabels/${zoom}/${t.tx}/${t.ty}.png`}
@@ -127,20 +216,22 @@ function MapView({ items, ps, onPin, hl, fb, gm }) {
             const click = gm === "nameToMap" && !fb;
             const cols = { neutral: "#1a237e", correct: "#2e7d32", wrong: "#c62828" };
             const c = isHl ? "#d32f2f" : (cols[st] || cols.neutral);
-            const pinR = isHl ? 14 : 11;
+            const pinR = isHl ? pinR_hl : pinR_base;
             return (
               <g key={it.letter} onClick={click ? () => onPin(it) : undefined}
                 style={{ cursor: click ? "pointer" : "default" }}>
+                {/* Invisible larger touch target for mobile */}
+                {click && <circle cx={pos.x} cy={pos.y} r={Math.max(pinR + 8, 22)} fill="transparent" />}
                 {isHl && (
-                  <circle cx={pos.x} cy={pos.y} r={22} fill={c} opacity="0.15">
-                    <animate attributeName="r" values="18;26;18" dur="1.4s" repeatCount="indefinite" />
+                  <circle cx={pos.x} cy={pos.y} r={pinR + 8} fill={c} opacity="0.15">
+                    <animate attributeName="r" values={`${pinR + 4};${pinR + 12};${pinR + 4}`} dur="1.4s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.2;0.05;0.2" dur="1.4s" repeatCount="indefinite" />
                   </circle>
                 )}
                 <circle cx={pos.x} cy={pos.y} r={pinR + 3} fill="white" opacity="0.9" />
                 <circle cx={pos.x} cy={pos.y} r={pinR} fill={c} />
                 <text x={pos.x} y={pos.y} textAnchor="middle" dominantBaseline="central"
-                  fill="white" fontSize={isHl ? 11 : 9} fontWeight="800"
+                  fill="white" fontSize={isHl ? fontSize_hl : fontSize_base} fontWeight="800"
                   fontFamily="'Fredoka',sans-serif">
                   {it.letter}
                 </text>
@@ -148,8 +239,14 @@ function MapView({ items, ps, onPin, hl, fb, gm }) {
             );
           })}
         </svg>
+        </div>
       </div>
       <div style={{ paddingBottom: `${(H / W) * 100}%` }} />
+      {isMobile && userZoom === 1 && (
+        <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.45)", color: "white", borderRadius: 8, padding: "3px 10px", fontSize: 10, fontWeight: 600, pointerEvents: "none", whiteSpace: "nowrap" }}>
+          Knijp om in te zoomen
+        </div>
+      )}
     </div>
   );
 }
@@ -538,7 +635,7 @@ export default function App() {
               </div>
             )}
 
-            <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10 }}>
+            <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10, maxHeight: "calc(100vh - 260px)" }}>
               <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} />
             </div>
 
