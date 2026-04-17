@@ -125,6 +125,7 @@ const REGIONS = {
     label: "Nederland",
     subtitle: "Landen \u00b7 Steden \u00b7 Rivieren",
     viewport: { lat: 52.2, lon: 5.3, zoom: 7 },
+    riverCategoryKey: "zeeen",
     categories: {
       landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
         {letter:"A",name:"Nederland",lat:52.13,lon:5.29},
@@ -152,12 +153,12 @@ const REGIONS = {
       ]},
     },
     riverLines: [
-      { key: "a", path: [{ lat: 51.87, lon: 6.01 }, { lat: 51.92, lon: 5.67 }, { lat: 51.96, lon: 5.35 }, { lat: 51.95, lon: 5.02 }, { lat: 51.93, lon: 4.48 }, { lat: 51.94, lon: 4.16 }] },
-      { key: "b", path: [{ lat: 50.78, lon: 5.69 }, { lat: 51.15, lon: 5.87 }, { lat: 51.44, lon: 5.48 }, { lat: 51.72, lon: 5.73 }, { lat: 51.81, lon: 5.32 }, { lat: 51.86, lon: 4.65 }, { lat: 51.88, lon: 4.28 }] },
-      { key: "c", path: [{ lat: 51.87, lon: 5.90 }, { lat: 51.88, lon: 5.63 }, { lat: 51.88, lon: 5.43 }, { lat: 51.88, lon: 5.08 }, { lat: 51.86, lon: 4.82 }, { lat: 51.85, lon: 4.58 }] },
-      { key: "d", path: [{ lat: 51.98, lon: 5.91 }, { lat: 52.17, lon: 5.98 }, { lat: 52.40, lon: 6.10 }, { lat: 52.56, lon: 6.12 }, { lat: 52.77, lon: 6.09 }, { lat: 53.02, lon: 6.10 }] },
-      { key: "e", path: [{ lat: 51.92, lon: 5.06 }, { lat: 51.95, lon: 4.95 }, { lat: 51.94, lon: 4.78 }, { lat: 51.91, lon: 4.60 }, { lat: 51.89, lon: 4.45 }] },
-      { key: "f", path: [{ lat: 51.26, lon: 4.40 }, { lat: 51.30, lon: 4.28 }, { lat: 51.35, lon: 4.14 }, { lat: 51.40, lon: 3.95 }, { lat: 51.44, lon: 3.75 }] },
+      { key: "rijn", letter: "a", path: [{ lat: 51.87, lon: 6.01 }, { lat: 51.92, lon: 5.67 }, { lat: 51.96, lon: 5.35 }, { lat: 51.95, lon: 5.02 }, { lat: 51.93, lon: 4.48 }, { lat: 51.94, lon: 4.16 }] },
+      { key: "maas", letter: "b", path: [{ lat: 50.78, lon: 5.69 }, { lat: 51.15, lon: 5.87 }, { lat: 51.44, lon: 5.48 }, { lat: 51.72, lon: 5.73 }, { lat: 51.81, lon: 5.32 }, { lat: 51.86, lon: 4.65 }, { lat: 51.88, lon: 4.28 }] },
+      { key: "waal", letter: "c", path: [{ lat: 51.87, lon: 5.90 }, { lat: 51.88, lon: 5.63 }, { lat: 51.88, lon: 5.43 }, { lat: 51.88, lon: 5.08 }, { lat: 51.86, lon: 4.82 }, { lat: 51.85, lon: 4.58 }] },
+      { key: "ijssel", letter: "d", path: [{ lat: 51.98, lon: 5.91 }, { lat: 52.17, lon: 5.98 }, { lat: 52.40, lon: 6.10 }, { lat: 52.56, lon: 6.12 }, { lat: 52.77, lon: 6.09 }, { lat: 53.02, lon: 6.10 }] },
+      { key: "lek", letter: "e", path: [{ lat: 51.92, lon: 5.06 }, { lat: 51.95, lon: 4.95 }, { lat: 51.94, lon: 4.78 }, { lat: 51.91, lon: 4.60 }, { lat: 51.89, lon: 4.45 }] },
+      { key: "schelde", letter: "f", path: [{ lat: 51.26, lon: 4.40 }, { lat: 51.30, lon: 4.28 }, { lat: 51.35, lon: 4.14 }, { lat: 51.40, lon: 3.95 }, { lat: 51.44, lon: 3.75 }] },
     ],
     capitalCountryPairs: [
       { country: "Nederland", capital: "Amsterdam" },
@@ -440,8 +441,8 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
               key={line.key}
               d={linePathToSvg(line.path)}
               fill="none"
-              stroke={hl === line.key ? "#0d47a1" : "#1565c0"}
-              strokeWidth={hl === line.key ? 7 : 5}
+              stroke={hl === line.letter ? "#0d47a1" : "#1565c0"}
+              strokeWidth={hl === line.letter ? 7 : 5}
               strokeLinecap="round"
               strokeLinejoin="round"
               opacity={0.6}
@@ -751,7 +752,7 @@ export default function App() {
   const resetT = () => { const r = { correct: 0, wrong: 0, games: 0 }; setTs(r); saveT(r); };
   const cur = qs[qi];
   const dI = cat === "alles" ? allItems : categories[cat]?.items || [];
-  const isRiverCategory = cat && categories[cat]?.label === "Rivieren";
+  const isRiverCategory = !!(cat && regionData?.riverCategoryKey && cat === regionData.riverCategoryKey);
   const mapLines = regionData?.riverLines && (isRiverCategory || cat === "alles") ? regionData.riverLines : [];
 
   return (
