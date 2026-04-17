@@ -613,7 +613,7 @@ export default function App() {
                 <h2 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "#2c3e50", marginBottom: 4 }}>Hoe wil je oefenen?</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
                   {Object.entries(MODES)
-                    .filter(([k]) => !(k === "capitalCountry" && !["landen", "steden", "alles"].includes(cat)))
+                    .filter(([k]) => k !== "capitalCountry" || ["landen", "steden", "alles"].includes(cat))
                     .map(([k, m]) => (
                     <button key={k} onClick={() => mpPlayers.length >= 2 ? startMultiplayer(cat, k) : startSingle(cat, k)} className="mc" style={{
                       background: "linear-gradient(135deg,#1565c0,#1976d2)", color: "white",
