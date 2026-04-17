@@ -1,42 +1,131 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
-const CATEGORIES = {
-  landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
-    {letter:"A",name:"Groenland",lat:69,lon:-37},
-    {letter:"B",name:"IJsland",lat:65,lon:-18},
-    {letter:"C",name:"Noorwegen",lat:64.5,lon:12},
-    {letter:"D",name:"Zweden",lat:63,lon:16},
-    {letter:"E",name:"Finland",lat:64,lon:26},
-    {letter:"F",name:"Denemarken",lat:56,lon:10},
-    {letter:"G",name:"Estland",lat:58.8,lon:25.5},
-    {letter:"H",name:"Letland",lat:57,lon:25},
-    {letter:"I",name:"Litouwen",lat:55.5,lon:24},
-    {letter:"J",name:"Polen",lat:52,lon:20},
-  ]},
-  steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
-    {letter:"1",name:"Reykjavik",lat:64.15,lon:-21.95},
-    {letter:"2",name:"Oslo",lat:59.91,lon:10.75},
-    {letter:"3",name:"Stockholm",lat:59.33,lon:18.07},
-    {letter:"4",name:"Helsinki",lat:60.17,lon:24.94},
-    {letter:"5",name:"Kopenhagen",lat:55.68,lon:12.57},
-    {letter:"6",name:"Warschau",lat:52.23,lon:21.01},
-  ]},
-  zeeen: { label:"Zee\u00ebn", emoji:"\u{1F30A}", color:"#005F73", items:[
-    {letter:"a",name:"Atlantische Oceaan",lat:58,lon:-20},
-    {letter:"b",name:"Noordzee",lat:57,lon:3},
-    {letter:"c",name:"Oostzee",lat:58,lon:19},
-  ]},
+const REGIONS = {
+  westEuropa: {
+    label: "West-Europa",
+    subtitle: "Landen \u00b7 Steden \u00b7 Zee\u00ebn",
+    viewport: { lat: 50, lon: 6, zoom: 4 },
+    categories: {
+      landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Nederland",lat:52.13,lon:5.29},
+        {letter:"B",name:"Belgi\u00eb",lat:50.5,lon:4.47},
+        {letter:"C",name:"Luxemburg",lat:49.75,lon:6.17},
+        {letter:"D",name:"Frankrijk",lat:46.22,lon:2.21},
+        {letter:"E",name:"Duitsland",lat:51.16,lon:10.45},
+        {letter:"F",name:"Zwitserland",lat:46.82,lon:8.22},
+        {letter:"G",name:"Oostenrijk",lat:47.52,lon:14.55},
+        {letter:"H",name:"Ierland",lat:53.14,lon:-7.69},
+        {letter:"I",name:"Verenigd Koninkrijk",lat:55.38,lon:-3.44},
+        {letter:"J",name:"Monaco",lat:43.74,lon:7.42},
+      ]},
+      steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Amsterdam",lat:52.37,lon:4.89},
+        {letter:"2",name:"Brussel",lat:50.85,lon:4.35},
+        {letter:"3",name:"Parijs",lat:48.86,lon:2.35},
+        {letter:"4",name:"Berlijn",lat:52.52,lon:13.41},
+        {letter:"5",name:"Wenen",lat:48.21,lon:16.37},
+        {letter:"6",name:"Dublin",lat:53.35,lon:-6.26},
+      ]},
+      zeeen: { label:"Zee\u00ebn", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"Atlantische Oceaan",lat:48,lon:-12},
+        {letter:"b",name:"Noordzee",lat:56,lon:3},
+        {letter:"c",name:"Het Kanaal",lat:50.2,lon:-1.2},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Nederland", capital: "Amsterdam" },
+      { country: "Belgi\u00eb", capital: "Brussel" },
+      { country: "Frankrijk", capital: "Parijs" },
+      { country: "Duitsland", capital: "Berlijn" },
+      { country: "Oostenrijk", capital: "Wenen" },
+      { country: "Ierland", capital: "Dublin" },
+    ],
+  },
+  zuidEuropa: {
+    label: "Zuid-Europa",
+    subtitle: "Landen \u00b7 Steden \u00b7 Zee\u00ebn",
+    viewport: { lat: 40, lon: 15, zoom: 4 },
+    categories: {
+      landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Spanje",lat:40.46,lon:-3.75},
+        {letter:"B",name:"Portugal",lat:39.4,lon:-8.22},
+        {letter:"C",name:"Itali\u00eb",lat:41.87,lon:12.57},
+        {letter:"D",name:"Griekenland",lat:39.07,lon:21.82},
+        {letter:"E",name:"Malta",lat:35.94,lon:14.38},
+        {letter:"F",name:"Cyprus",lat:35.13,lon:33.43},
+        {letter:"G",name:"Andorra",lat:42.51,lon:1.52},
+        {letter:"H",name:"San Marino",lat:43.94,lon:12.46},
+        {letter:"I",name:"Vaticaanstad",lat:41.9,lon:12.45},
+        {letter:"J",name:"Kroati\u00eb",lat:45.1,lon:15.2},
+      ]},
+      steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Madrid",lat:40.42,lon:-3.7},
+        {letter:"2",name:"Lissabon",lat:38.72,lon:-9.14},
+        {letter:"3",name:"Rome",lat:41.9,lon:12.5},
+        {letter:"4",name:"Athene",lat:37.98,lon:23.73},
+        {letter:"5",name:"Valletta",lat:35.9,lon:14.51},
+        {letter:"6",name:"Nicosia",lat:35.19,lon:33.38},
+      ]},
+      zeeen: { label:"Zee\u00ebn", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"Middellandse Zee",lat:38,lon:16},
+        {letter:"b",name:"Adriatische Zee",lat:43,lon:16},
+        {letter:"c",name:"Tyrrheense Zee",lat:40.3,lon:12.2},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Spanje", capital: "Madrid" },
+      { country: "Portugal", capital: "Lissabon" },
+      { country: "Itali\u00eb", capital: "Rome" },
+      { country: "Griekenland", capital: "Athene" },
+      { country: "Malta", capital: "Valletta" },
+      { country: "Cyprus", capital: "Nicosia" },
+    ],
+  },
+  balkan: {
+    label: "Balkan",
+    subtitle: "Landen \u00b7 Steden \u00b7 Zee\u00ebn",
+    viewport: { lat: 43, lon: 21, zoom: 5 },
+    categories: {
+      landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Sloveni\u00eb",lat:46.15,lon:14.99},
+        {letter:"B",name:"Kroati\u00eb",lat:45.1,lon:15.2},
+        {letter:"C",name:"Bosni\u00eb en Herzegovina",lat:43.92,lon:17.68},
+        {letter:"D",name:"Servi\u00eb",lat:44.02,lon:20.91},
+        {letter:"E",name:"Montenegro",lat:42.71,lon:19.37},
+        {letter:"F",name:"Albani\u00eb",lat:41.15,lon:20.17},
+        {letter:"G",name:"Noord-Macedoni\u00eb",lat:41.61,lon:21.75},
+        {letter:"H",name:"Bulgarije",lat:42.73,lon:25.49},
+        {letter:"I",name:"Roemeni\u00eb",lat:45.94,lon:24.97},
+        {letter:"J",name:"Kosovo",lat:42.6,lon:20.9},
+      ]},
+      steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Ljubljana",lat:46.06,lon:14.51},
+        {letter:"2",name:"Zagreb",lat:45.81,lon:15.98},
+        {letter:"3",name:"Sarajevo",lat:43.86,lon:18.41},
+        {letter:"4",name:"Belgrado",lat:44.79,lon:20.45},
+        {letter:"5",name:"Tirana",lat:41.33,lon:19.82},
+        {letter:"6",name:"Sofia",lat:42.7,lon:23.32},
+      ]},
+      zeeen: { label:"Zee\u00ebn", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"Adriatische Zee",lat:43,lon:16},
+        {letter:"b",name:"Ionische Zee",lat:39.5,lon:19.5},
+        {letter:"c",name:"Zwarte Zee",lat:43.5,lon:30},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Sloveni\u00eb", capital: "Ljubljana" },
+      { country: "Kroati\u00eb", capital: "Zagreb" },
+      { country: "Bosni\u00eb en Herzegovina", capital: "Sarajevo" },
+      { country: "Servi\u00eb", capital: "Belgrado" },
+      { country: "Albani\u00eb", capital: "Tirana" },
+      { country: "Bulgarije", capital: "Sofia" },
+    ],
+  },
 };
 
-const ALL = [...CATEGORIES.landen.items,...CATEGORIES.steden.items,...CATEGORIES.zeeen.items];
-const CAPITAL_COUNTRY_PAIRS = [
-  { country: "IJsland", capital: "Reykjavik" },
-  { country: "Noorwegen", capital: "Oslo" },
-  { country: "Zweden", capital: "Stockholm" },
-  { country: "Finland", capital: "Helsinki" },
-  { country: "Denemarken", capital: "Kopenhagen" },
-  { country: "Polen", capital: "Warschau" },
-];
+function getAllItems(categories) {
+  return [...categories.landen.items, ...categories.steden.items, ...categories.zeeen.items];
+}
 const MODES = {
   nameToMap:{label:"Vind op de kaart",emoji:"\u{1F4CD}",desc:"Tik op de juiste plek"},
   mapToName:{label:"Benoem de plek",emoji:"\u{1F3F7}\uFE0F",desc:"Kies de juiste naam"},
@@ -74,10 +163,11 @@ function modeLabel(mode) {
   return mode;
 }
 
-function MapView({ items, ps, onPin, hl, fb, gm }) {
+function MapView({ items, ps, onPin, hl, fb, gm, viewport }) {
   const W = 900, H = 500;
-  const zoom = 4;
-  const centerLat = 63, centerLon = -5;
+  const zoom = viewport?.zoom || 4;
+  const centerLat = viewport?.lat || 50;
+  const centerLon = viewport?.lon || 6;
 
   const latLonToPixel = useCallback((lat, lon) => {
     const n = Math.pow(2, zoom);
@@ -369,7 +459,8 @@ function FinishScreen({ s, onR, playerName, cat, gm, multiplayer, mpResults, onN
 }
 
 export default function App() {
-  const [scr, setScr] = useState("menu");
+  const [scr, setScr] = useState("regionIntro");
+  const [region, setRegion] = useState(null);
   const [cat, setCat] = useState(null);
   const [gm, setGm] = useState(null);
   const [qs, setQs] = useState([]);
@@ -401,9 +492,14 @@ export default function App() {
     try { window.name = JSON.stringify({ t }); } catch (e) {}
   };
 
+  const regionData = region ? REGIONS[region] : null;
+  const categories = useMemo(() => regionData?.categories || {}, [regionData]);
+  const allItems = useMemo(() => regionData ? getAllItems(regionData.categories) : [], [regionData]);
+  const capitalCountryPairs = useMemo(() => regionData?.capitalCountryPairs || [], [regionData]);
+
   const buildQuestions = (c, m) => {
     if (m === "capitalCountry") {
-      const pairs = shuffle(CAPITAL_COUNTRY_PAIRS);
+      const pairs = shuffle(capitalCountryPairs);
       return pairs.map((pair, i) => {
         const askCountryToCapital = Math.random() < 0.5;
         const correctName = askCountryToCapital ? pair.capital : pair.country;
@@ -419,18 +515,38 @@ export default function App() {
         };
       });
     }
-    const its = c === "alles" ? ALL : CATEGORIES[c].items;
+    const its = c === "alles" ? allItems : categories[c]?.items || [];
     const s = shuffle(its);
     if (m === "mapToName") {
       return s.map(i => ({
         ...i,
-        opts: shuffle([i, ...shuffle(ALL.filter(x => x.name !== i.name)).slice(0, 3)])
+        opts: shuffle([i, ...shuffle(allItems.filter(x => x.name !== i.name)).slice(0, 3)])
       }));
     }
     return s;
   };
 
+  const chooseRegion = (regionKey) => {
+    clearTimeout(tmr.current);
+    setRegion(regionKey);
+    setCat(null);
+    setGm(null);
+    setQs([]);
+    setQi(0);
+    setSc({ correct: 0, wrong: 0 });
+    setFb(null);
+    setPs({});
+    setCs({});
+    setMpMode(false);
+    setMpPlayers([]);
+    setMpInput("");
+    setMpCurrent(0);
+    setMpResults([]);
+    setScr("menu");
+  };
+
   const start = (c, m) => {
+    if (!regionData) { setScr("regionIntro"); return; }
     const nqs = buildQuestions(c, m);
     if (!nqs.length) return;
     setQs(nqs);
@@ -482,8 +598,9 @@ export default function App() {
         const finalTotal = finalCorrect + finalWrong;
         const nt = { correct: ts.correct + finalCorrect, wrong: ts.wrong + finalWrong, games: ts.games + 1 };
         setTs(nt); saveT(nt);
-        const catLabel = cat === "alles" ? "Alles" : CATEGORIES[cat]?.label || cat;
-        addToLeaderboard(playerName || "Speler", finalCorrect, finalTotal, catLabel, gm);
+        const catLabel = cat === "alles" ? "Alles" : categories[cat]?.label || cat;
+        const regionLabel = regionData?.label || "Regio";
+        addToLeaderboard(playerName || "Speler", finalCorrect, finalTotal, `${regionLabel} \u00b7 ${catLabel}`, gm);
         if (mpMode) {
           setMpResults(r => [...r, { name: playerName, correct: finalCorrect, wrong: finalWrong, total: finalTotal, pct: finalTotal > 0 ? Math.round((finalCorrect / finalTotal) * 100) : 0 }]);
         }
@@ -492,7 +609,7 @@ export default function App() {
         setQi(q => q + 1);
       }
     }, 1400);
-  }, [fb, qs, qi, gm, sc, ts, playerName, mpMode, cat]);
+  }, [fb, qs, qi, gm, sc, ts, playerName, mpMode, cat, categories, regionData, capitalCountryPairs, allItems]);
 
   const restart = (m) => {
     if (m) { setMpMode(false); setMpPlayers([]); setMpResults([]); setScr("menu"); }
@@ -500,7 +617,7 @@ export default function App() {
   };
   const resetT = () => { const r = { correct: 0, wrong: 0, games: 0 }; setTs(r); saveT(r); };
   const cur = qs[qi];
-  const dI = cat === "alles" ? ALL : CATEGORIES[cat]?.items || [];
+  const dI = cat === "alles" ? allItems : categories[cat]?.items || [];
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8f0f8 0%,#dce8f0 50%,#e0eee0 100%)", fontFamily: "'Nunito',sans-serif" }}>
@@ -518,11 +635,13 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 26 }}>{"\u{1F5FA}\uFE0F"}</span>
           <div>
-            <h1 style={{ margin: 0, fontSize: 17, fontFamily: "'Fredoka',sans-serif", fontWeight: 700, color: "#2c3e50" }}>Noord-Europa Quiz</h1>
-            <p style={{ margin: 0, fontSize: 10, color: "#7f8c8d" }}>Landen {"\u00b7"} Steden {"\u00b7"} Zee{"\u00eb"}n</p>
+            <h1 style={{ margin: 0, fontSize: 17, fontFamily: "'Fredoka',sans-serif", fontWeight: 700, color: "#2c3e50" }}>
+              {regionData ? `${regionData.label} Quiz` : "Europa Quiz"}
+            </h1>
+            <p style={{ margin: 0, fontSize: 10, color: "#7f8c8d" }}>{regionData?.subtitle || "Kies een regio om te starten"}</p>
           </div>
         </div>
-        {scr !== "menu" && (
+        {scr !== "menu" && scr !== "regionIntro" && (
           <button onClick={() => { clearTimeout(tmr.current); setScr("menu"); }}
             style={{ background: "rgba(0,0,0,.05)", border: "none", borderRadius: 10, padding: "5px 12px", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#7f8c8d" }}>
             {"\u2190"} Menu
@@ -531,6 +650,38 @@ export default function App() {
       </div>
 
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "14px 14px 36px" }}>
+
+        {/* REGION INTRO */}
+        {scr === "regionIntro" && (
+          <div className="su">
+            <h2 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, color: "#2c3e50", marginBottom: 4, marginTop: 4 }}>Kies je regio</h2>
+            <p style={{ color: "#7f8c8d", fontSize: 13, marginTop: 0, marginBottom: 16 }}>Selecteer de regio waarmee je wilt oefenen.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {Object.entries(REGIONS).map(([key, cfg]) => (
+                <button key={key} onClick={() => chooseRegion(key)} className="mc" style={{
+                  width: "100%",
+                  background: "linear-gradient(135deg,#1565c0,#1976d2)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  textAlign: "left",
+                  boxShadow: "0 4px 14px rgba(21,101,192,.3)",
+                }}>
+                  <span style={{ fontSize: 26 }}>{"\u{1F30D}"}</span>
+                  <div>
+                    <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: 16 }}>{cfg.label}</div>
+                    <div style={{ fontSize: 11, opacity: 0.85 }}>{cfg.subtitle}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* MENU */}
         {scr === "menu" && (
@@ -558,11 +709,19 @@ export default function App() {
               </div>
             </button>
 
+            <button onClick={() => setScr("regionIntro")} className="mc" style={{ width: "100%", background: "rgba(255,255,255,0.92)", color: "#2c3e50", border: "2px solid #dbe5f0", borderRadius: 14, padding: "10px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>{"\u{1F30D}"}</span>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: 14 }}>Regio wijzigen</div>
+                <div style={{ fontSize: 11, opacity: 0.7 }}>{regionData?.label || "Nog geen regio gekozen"}</div>
+              </div>
+            </button>
+
             <h2 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "#2c3e50", marginBottom: 4, marginTop: 4 }}>Kies een categorie</h2>
             <p style={{ color: "#7f8c8d", fontSize: 13, marginTop: 0, marginBottom: 12 }}>Wat wil je oefenen?</p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-              {[...Object.entries(CATEGORIES), ["alles", { label: "Alles!", emoji: "\u{1F30D}", color: "#6a1b9a", items: ALL }]].map(([k, c]) => (
+              {[...Object.entries(categories), ["alles", { label: "Alles!", emoji: "\u{1F30D}", color: "#6a1b9a", items: allItems }]].map(([k, c]) => (
                 <div key={k} className="mc" onClick={() => setCat(k)} style={{
                   background: cat === k ? "linear-gradient(135deg," + c.color + "12," + c.color + "22)" : "rgba(255,255,255,0.85)",
                   border: "2px solid " + (cat === k ? c.color : "transparent"),
@@ -678,7 +837,7 @@ export default function App() {
 
             {gm !== "capitalCountry" && (
               <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10, maxHeight: "calc(100vh - 260px)" }}>
-                <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} />
+                <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} viewport={regionData?.viewport} />
               </div>
             )}
 
