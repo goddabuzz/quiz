@@ -121,6 +121,111 @@ const REGIONS = {
       { country: "Bulgarije", capital: "Sofia" },
     ],
   },
+  nederland: {
+    label: "Nederland",
+    subtitle: "Landen \u00b7 Steden \u00b7 Rivieren",
+    viewport: { lat: 52.2, lon: 5.3, zoom: 7 },
+    categories: {
+      landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Nederland",lat:52.13,lon:5.29},
+        {letter:"B",name:"Belgi\u00eb",lat:50.5,lon:4.47},
+        {letter:"C",name:"Duitsland",lat:51.16,lon:10.45},
+        {letter:"D",name:"Luxemburg",lat:49.75,lon:6.17},
+      ]},
+      steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Amsterdam",lat:52.37,lon:4.89},
+        {letter:"2",name:"Rotterdam",lat:51.92,lon:4.48},
+        {letter:"3",name:"Den Haag",lat:52.08,lon:4.3},
+        {letter:"4",name:"Utrecht",lat:52.09,lon:5.12},
+        {letter:"5",name:"Groningen",lat:53.22,lon:6.57},
+        {letter:"6",name:"Maastricht",lat:50.85,lon:5.69},
+        {letter:"7",name:"Arnhem",lat:51.98,lon:5.91},
+        {letter:"8",name:"Eindhoven",lat:51.44,lon:5.48},
+      ]},
+      zeeen: { label:"Rivieren", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"Rijn",lat:51.94,lon:4.16},
+        {letter:"b",name:"Maas",lat:51.72,lon:5.73},
+        {letter:"c",name:"Waal",lat:51.88,lon:5.43},
+        {letter:"d",name:"IJssel",lat:52.56,lon:6.12},
+        {letter:"e",name:"Lek",lat:51.95,lon:4.95},
+        {letter:"f",name:"Schelde",lat:51.35,lon:4.14},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Nederland", capital: "Amsterdam" },
+      { country: "Belgi\u00eb", capital: "Brussel" },
+      { country: "Duitsland", capital: "Berlijn" },
+      { country: "Luxemburg", capital: "Luxemburg" },
+    ],
+  },
+  grootBrittannie: {
+    label: "Groot-Brittanni\u00eb",
+    subtitle: "Landen \u00b7 Steden \u00b7 Zee\u00ebn",
+    viewport: { lat: 54.2, lon: -2.5, zoom: 6 },
+    categories: {
+      landen: { label:"Landen", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Engeland",lat:52.36,lon:-1.17},
+        {letter:"B",name:"Schotland",lat:56.49,lon:-4.2},
+        {letter:"C",name:"Wales",lat:52.13,lon:-3.78},
+      ]},
+      steden: { label:"Steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Londen",lat:51.51,lon:-0.13},
+        {letter:"2",name:"Edinburgh",lat:55.95,lon:-3.19},
+        {letter:"3",name:"Cardiff",lat:51.48,lon:-3.18},
+        {letter:"4",name:"Glasgow",lat:55.86,lon:-4.25},
+        {letter:"5",name:"Manchester",lat:53.48,lon:-2.24},
+        {letter:"6",name:"Birmingham",lat:52.49,lon:-1.89},
+      ]},
+      zeeen: { label:"Zee\u00ebn", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"Noordzee",lat:56.5,lon:2.5},
+        {letter:"b",name:"Ierse Zee",lat:54.5,lon:-4.5},
+        {letter:"c",name:"Het Kanaal",lat:50.4,lon:-1.4},
+        {letter:"d",name:"Atlantische Oceaan",lat:54,lon:-10},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Engeland", capital: "Londen" },
+      { country: "Schotland", capital: "Edinburgh" },
+      { country: "Wales", capital: "Cardiff" },
+    ],
+  },
+  friesland: {
+    label: "Friesland",
+    subtitle: "Regio's \u00b7 Elf steden \u00b7 Grootste meren",
+    viewport: { lat: 53.1, lon: 5.75, zoom: 9 },
+    categories: {
+      landen: { label:"Regio's", emoji:"\u{1F3D4}\uFE0F", color:"#2D6A4F", items:[
+        {letter:"A",name:"Friesland",lat:53.1,lon:5.8},
+        {letter:"B",name:"Terschelling",lat:53.37,lon:5.22},
+        {letter:"C",name:"Ameland",lat:53.45,lon:5.76},
+        {letter:"D",name:"Schiermonnikoog",lat:53.48,lon:6.17},
+      ]},
+      steden: { label:"Elf steden", emoji:"\u{1F3F0}", color:"#9B2226", items:[
+        {letter:"1",name:"Leeuwarden",lat:53.2,lon:5.8},
+        {letter:"2",name:"Sneek",lat:53.03,lon:5.66},
+        {letter:"3",name:"IJlst",lat:53.01,lon:5.62},
+        {letter:"4",name:"Sloten",lat:52.89,lon:5.65},
+        {letter:"5",name:"Stavoren",lat:52.89,lon:5.36},
+        {letter:"6",name:"Hindeloopen",lat:52.94,lon:5.4},
+        {letter:"7",name:"Workum",lat:52.98,lon:5.45},
+        {letter:"8",name:"Bolsward",lat:53.07,lon:5.53},
+        {letter:"9",name:"Harlingen",lat:53.17,lon:5.42},
+        {letter:"10",name:"Franeker",lat:53.19,lon:5.54},
+        {letter:"11",name:"Dokkum",lat:53.32,lon:6},
+      ]},
+      zeeen: { label:"Meren", emoji:"\u{1F30A}", color:"#005F73", items:[
+        {letter:"a",name:"IJsselmeer",lat:52.84,lon:5.37},
+        {letter:"b",name:"Tjeukemeer",lat:52.93,lon:5.8},
+        {letter:"c",name:"Fluessen",lat:52.96,lon:5.52},
+        {letter:"d",name:"Slotermeer",lat:52.9,lon:5.62},
+        {letter:"e",name:"Sneekermeer",lat:53.03,lon:5.7},
+        {letter:"f",name:"Bergumermeer",lat:53.17,lon:5.95},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "Friesland", capital: "Leeuwarden" },
+    ],
+  },
 };
 
 function getAllItems(categories) {
