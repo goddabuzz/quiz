@@ -216,7 +216,7 @@ const REGIONS = {
       zeeen: { label:"Meren", emoji:"\u{1F30A}", color:"#005F73", items:[
         {letter:"a",name:"IJsselmeer",lat:52.84,lon:5.37},
         {letter:"b",name:"Tjeukemeer",lat:52.93,lon:5.8},
-        {letter:"c",name:"Fluessen",lat:52.96,lon:5.52},
+        {letter:"c",name:"Heegermeer",lat:52.97,lon:5.57},
         {letter:"d",name:"Slotermeer",lat:52.9,lon:5.62},
         {letter:"e",name:"Sneekermeer",lat:53.03,lon:5.7},
         {letter:"f",name:"Bergumermeer",lat:53.17,lon:5.95},
