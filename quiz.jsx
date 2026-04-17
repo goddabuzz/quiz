@@ -29,9 +29,18 @@ const CATEGORIES = {
 };
 
 const ALL = [...CATEGORIES.landen.items,...CATEGORIES.steden.items,...CATEGORIES.zeeen.items];
+const CAPITAL_COUNTRY_PAIRS = [
+  { country: "IJsland", capital: "Reykjavik" },
+  { country: "Noorwegen", capital: "Oslo" },
+  { country: "Zweden", capital: "Stockholm" },
+  { country: "Finland", capital: "Helsinki" },
+  { country: "Denemarken", capital: "Kopenhagen" },
+  { country: "Polen", capital: "Warschau" },
+];
 const MODES = {
   nameToMap:{label:"Vind op de kaart",emoji:"\u{1F4CD}",desc:"Tik op de juiste plek"},
   mapToName:{label:"Benoem de plek",emoji:"\u{1F3F7}\uFE0F",desc:"Kies de juiste naam"},
+  capitalCountry:{label:"Hoofdstad \u2194 Land",emoji:"\u{1F3DB}\uFE0F",desc:"Meerkeuze in beide richtingen"},
 };
 
 const LB_KEY = "quiz_leaderboard";
@@ -56,6 +65,13 @@ function shuffle(a) {
     [b[i], b[j]] = [b[j], b[i]];
   }
   return b;
+}
+
+function modeLabel(mode) {
+  if (mode === "nameToMap") return "Kaart";
+  if (mode === "mapToName") return "Naam";
+  if (mode === "capitalCountry") return "Hoofdstad/Land";
+  return mode;
 }
 
 function MapView({ items, ps, onPin, hl, fb, gm }) {
@@ -295,7 +311,7 @@ function Leaderboard({ onBack }) {
               </span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: 14, color: "#2c3e50" }}>{e.name}</div>
-                <div style={{ fontSize: 10, color: "#95a5a6" }}>{e.category} {"\u00b7"} {e.mode === "nameToMap" ? "Kaart" : "Naam"}</div>
+                <div style={{ fontSize: 10, color: "#95a5a6" }}>{e.category} {"\u00b7"} {modeLabel(e.mode)}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: 18, color: e.pct >= 80 ? "#2e7d32" : e.pct >= 50 ? "#f9a825" : "#c62828" }}>{e.pct}%</div>
@@ -386,6 +402,23 @@ export default function App() {
   };
 
   const buildQuestions = (c, m) => {
+    if (m === "capitalCountry") {
+      const pairs = shuffle(CAPITAL_COUNTRY_PAIRS);
+      return pairs.map((pair, i) => {
+        const askCountryToCapital = Math.random() < 0.5;
+        const correctName = askCountryToCapital ? pair.capital : pair.country;
+        const pool = askCountryToCapital ? pairs.map(p => p.capital) : pairs.map(p => p.country);
+        const wrongNames = shuffle(pool.filter(n => n !== correctName)).slice(0, 3);
+        const correctOpt = { letter: `cc-${i}-0`, name: correctName };
+        const opts = shuffle([correctOpt, ...wrongNames.map((name, j) => ({ letter: `cc-${i}-${j + 1}`, name }))]);
+        return {
+          letter: correctOpt.letter,
+          name: correctName,
+          prompt: askCountryToCapital ? `Welke hoofdstad hoort bij ${pair.country}?` : `Welk land hoort bij ${pair.capital}?`,
+          opts
+        };
+      });
+    }
     const its = c === "alles" ? ALL : CATEGORIES[c].items;
     const s = shuffle(its);
     if (m === "mapToName") {
@@ -398,7 +431,9 @@ export default function App() {
   };
 
   const start = (c, m) => {
-    setQs(buildQuestions(c, m));
+    const nqs = buildQuestions(c, m);
+    if (!nqs.length) return;
+    setQs(nqs);
     setCat(c); setGm(m); setQi(0);
     setSc({ correct: 0, wrong: 0 });
     setFb(null); setPs({}); setCs({});
@@ -577,7 +612,9 @@ export default function App() {
 
                 <h2 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "#2c3e50", marginBottom: 4 }}>Hoe wil je oefenen?</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-                  {Object.entries(MODES).map(([k, m]) => (
+                  {Object.entries(MODES)
+                    .filter(([k]) => !(k === "capitalCountry" && !["landen", "steden", "alles"].includes(cat)))
+                    .map(([k, m]) => (
                     <button key={k} onClick={() => mpPlayers.length >= 2 ? startMultiplayer(cat, k) : startSingle(cat, k)} className="mc" style={{
                       background: "linear-gradient(135deg,#1565c0,#1976d2)", color: "white",
                       border: "none", borderRadius: 14, padding: "16px 18px", cursor: "pointer",
@@ -622,6 +659,10 @@ export default function App() {
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, fontWeight: 700, color: "#2c3e50" }}>
                   Waar ligt <span style={{ color: "#1565c0" }}>{cur.name}</span>?
                 </div>
+              ) : gm === "capitalCountry" ? (
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, fontWeight: 700, color: "#2c3e50" }}>
+                  {cur.prompt}
+                </div>
               ) : (
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, fontWeight: 700, color: "#2c3e50" }}>
                   Wat is punt <span style={{ background: "#1565c0", color: "white", borderRadius: 7, padding: "1px 9px" }}>{cur.letter}</span>?
@@ -635,13 +676,15 @@ export default function App() {
               </div>
             )}
 
-            <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10, maxHeight: "calc(100vh - 260px)" }}>
-              <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} />
-            </div>
+            {gm !== "capitalCountry" && (
+              <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10, maxHeight: "calc(100vh - 260px)" }}>
+                <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} />
+              </div>
+            )}
 
 
 
-            {gm === "mapToName" && cur.opts && (
+            {(gm === "mapToName" || gm === "capitalCountry") && cur.opts && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
                 {cur.opts.map(o => {
                   const st = cs[o.name];
