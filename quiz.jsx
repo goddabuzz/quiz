@@ -751,7 +751,8 @@ export default function App() {
   const resetT = () => { const r = { correct: 0, wrong: 0, games: 0 }; setTs(r); saveT(r); };
   const cur = qs[qi];
   const dI = cat === "alles" ? allItems : categories[cat]?.items || [];
-  const mapLines = regionData?.riverLines && (cat === "zeeen" || cat === "alles") ? regionData.riverLines : [];
+  const isRiverCategory = cat && categories[cat]?.label === "Rivieren";
+  const mapLines = regionData?.riverLines && (isRiverCategory || cat === "alles") ? regionData.riverLines : [];
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8f0f8 0%,#dce8f0 50%,#e0eee0 100%)", fontFamily: "'Nunito',sans-serif" }}>
