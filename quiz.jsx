@@ -151,6 +151,14 @@ const REGIONS = {
         {letter:"f",name:"Schelde",lat:51.35,lon:4.14},
       ]},
     },
+    riverLines: [
+      { key: "a", path: [{ lat: 51.87, lon: 6.01 }, { lat: 51.92, lon: 5.67 }, { lat: 51.96, lon: 5.35 }, { lat: 51.95, lon: 5.02 }, { lat: 51.93, lon: 4.48 }, { lat: 51.94, lon: 4.16 }] },
+      { key: "b", path: [{ lat: 50.78, lon: 5.69 }, { lat: 51.15, lon: 5.87 }, { lat: 51.44, lon: 5.48 }, { lat: 51.72, lon: 5.73 }, { lat: 51.81, lon: 5.32 }, { lat: 51.86, lon: 4.65 }, { lat: 51.88, lon: 4.28 }] },
+      { key: "c", path: [{ lat: 51.87, lon: 5.90 }, { lat: 51.88, lon: 5.63 }, { lat: 51.88, lon: 5.43 }, { lat: 51.88, lon: 5.08 }, { lat: 51.86, lon: 4.82 }, { lat: 51.85, lon: 4.58 }] },
+      { key: "d", path: [{ lat: 51.98, lon: 5.91 }, { lat: 52.17, lon: 5.98 }, { lat: 52.40, lon: 6.10 }, { lat: 52.56, lon: 6.12 }, { lat: 52.77, lon: 6.09 }, { lat: 53.02, lon: 6.10 }] },
+      { key: "e", path: [{ lat: 51.92, lon: 5.06 }, { lat: 51.95, lon: 4.95 }, { lat: 51.94, lon: 4.78 }, { lat: 51.91, lon: 4.60 }, { lat: 51.89, lon: 4.45 }] },
+      { key: "f", path: [{ lat: 51.26, lon: 4.40 }, { lat: 51.30, lon: 4.28 }, { lat: 51.35, lon: 4.14 }, { lat: 51.40, lon: 3.95 }, { lat: 51.44, lon: 3.75 }] },
+    ],
     capitalCountryPairs: [
       { country: "Nederland", capital: "Amsterdam" },
       { country: "Belgi\u00eb", capital: "Brussel" },
@@ -268,7 +276,7 @@ function modeLabel(mode) {
   return mode;
 }
 
-function MapView({ items, ps, onPin, hl, fb, gm, viewport }) {
+function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
   const W = 900, H = 500;
   const zoom = viewport?.zoom || 4;
   const centerLat = viewport?.lat || 50;
@@ -305,6 +313,13 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport }) {
     const p = latLonToPixel(lat, lon);
     return { x: p.x - offsetX, y: p.y - offsetY };
   }, [latLonToPixel, offsetX, offsetY]);
+
+  const linePathToSvg = useCallback((path = []) => {
+    return path.map((point, index) => {
+      const pos = pinPosition(point.lat, point.lon);
+      return `${index === 0 ? "M" : "L"} ${pos.x} ${pos.y}`;
+    }).join(" ");
+  }, [pinPosition]);
 
   const containerRef = useRef(null);
   const [baseScale, setBaseScale] = useState(1);
@@ -420,6 +435,19 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport }) {
           />
         ))}
         <svg style={{ position: "absolute", inset: 0, width: W, height: H }}>
+          {lines.map(line => (
+            <path
+              key={line.key}
+              d={linePathToSvg(line.path)}
+              fill="none"
+              stroke={hl === line.key ? "#0d47a1" : "#1565c0"}
+              strokeWidth={hl === line.key ? 7 : 5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={0.6}
+              pointerEvents="none"
+            />
+          ))}
           {items.map(it => {
             const pos = pinPosition(it.lat, it.lon);
             const st = ps[it.letter] || "neutral";
@@ -723,6 +751,7 @@ export default function App() {
   const resetT = () => { const r = { correct: 0, wrong: 0, games: 0 }; setTs(r); saveT(r); };
   const cur = qs[qi];
   const dI = cat === "alles" ? allItems : categories[cat]?.items || [];
+  const mapLines = regionData?.riverLines && (cat === "zeeen" || cat === "alles") ? regionData.riverLines : [];
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#e8f0f8 0%,#dce8f0 50%,#e0eee0 100%)", fontFamily: "'Nunito',sans-serif" }}>
@@ -942,7 +971,7 @@ export default function App() {
 
             {gm !== "capitalCountry" && (
               <div style={{ background: "rgba(255,255,255,0.95)", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,.1)", marginBottom: 10, maxHeight: "calc(100vh - 260px)" }}>
-                <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} viewport={regionData?.viewport} />
+                <MapView items={dI} ps={ps} onPin={answer} hl={gm === "mapToName" ? cur.letter : null} fb={fb} gm={gm} viewport={regionData?.viewport} lines={mapLines} />
               </div>
             )}
 
