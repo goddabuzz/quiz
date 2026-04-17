@@ -546,7 +546,7 @@ export default function App() {
   };
 
   const start = (c, m) => {
-    if (!regionData) return;
+    if (!regionData) { setScr("regionIntro"); return; }
     const nqs = buildQuestions(c, m);
     if (!nqs.length) return;
     setQs(nqs);
