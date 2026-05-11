@@ -1,6 +1,46 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
 const REGIONS = {
+  noordEuropa: {
+    label: "Noord-Europa",
+    subtitle: "Landen · Steden · Zeeën",
+    viewport: { lat: 62, lon: -7, zoom: 3 },
+    categories: {
+      landen: { label:"Landen", emoji:"🏔️", color:"#2D6A4F", items:[
+        {letter:"A",name:"Groenland",lat:71.71,lon:-42.6},
+        {letter:"B",name:"IJsland",lat:64.96,lon:-19.02},
+        {letter:"C",name:"Noorwegen",lat:60.47,lon:8.47},
+        {letter:"D",name:"Zweden",lat:60.13,lon:18.64},
+        {letter:"E",name:"Finland",lat:61.92,lon:25.75},
+        {letter:"F",name:"Denemarken",lat:56.26,lon:9.5},
+        {letter:"G",name:"Estland",lat:58.6,lon:25.01},
+        {letter:"H",name:"Letland",lat:56.88,lon:24.6},
+        {letter:"I",name:"Litouwen",lat:55.17,lon:23.88},
+        {letter:"J",name:"Polen",lat:51.92,lon:19.15},
+      ]},
+      steden: { label:"Steden", emoji:"🏰", color:"#9B2226", items:[
+        {letter:"1",name:"Reykjavik",lat:64.15,lon:-21.94},
+        {letter:"2",name:"Oslo",lat:59.91,lon:10.75},
+        {letter:"3",name:"Stockholm",lat:59.33,lon:18.07},
+        {letter:"4",name:"Helsinki",lat:60.17,lon:24.94},
+        {letter:"5",name:"Kopenhagen",lat:55.68,lon:12.57},
+        {letter:"6",name:"Warschau",lat:52.23,lon:21.01},
+      ]},
+      zeeen: { label:"Zeeën", emoji:"🌊", color:"#005F73", items:[
+        {letter:"a",name:"Atlantische Oceaan",lat:60,lon:-20},
+        {letter:"b",name:"Noordzee",lat:57,lon:3},
+        {letter:"c",name:"Oostzee",lat:58,lon:20},
+      ]},
+    },
+    capitalCountryPairs: [
+      { country: "IJsland", capital: "Reykjavik" },
+      { country: "Noorwegen", capital: "Oslo" },
+      { country: "Zweden", capital: "Stockholm" },
+      { country: "Finland", capital: "Helsinki" },
+      { country: "Denemarken", capital: "Kopenhagen" },
+      { country: "Polen", capital: "Warschau" },
+    ],
+  },
   westEuropa: {
     label: "West-Europa",
     subtitle: "Landen \u00b7 Steden \u00b7 Zee\u00ebn",
