@@ -320,7 +320,7 @@ function modeLabel(mode) {
 function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
   const W = 900, H = 500;
   const zoom = viewport?.zoom || 4;
-  const defaultUserZoom = viewport?.initialZoom || 1;
+  const initialUserZoom = viewport?.initialZoom || 1;
   const centerLat = viewport?.lat || 50;
   const centerLon = viewport?.lon || 6;
 
@@ -367,7 +367,7 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
   const [baseScale, setBaseScale] = useState(1);
 
   // Pan & zoom state
-  const [userZoom, setUserZoom] = useState(defaultUserZoom);
+  const [userZoom, setUserZoom] = useState(initialUserZoom);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const gestureRef = useRef({ startDist: 0, startZoom: 1, startPan: { x: 0, y: 0 }, startMid: { x: 0, y: 0 }, isPinching: false, lastTap: 0 });
   const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startPan: { x: 0, y: 0 } });
@@ -390,9 +390,9 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
 
   // Reset zoom/pan when question changes (hl or fb changes)
   useEffect(() => {
-    setUserZoom(defaultUserZoom);
+    setUserZoom(initialUserZoom);
     setPan({ x: 0, y: 0 });
-  }, [defaultUserZoom, hl]);
+  }, [hl, initialUserZoom]);
 
   const dist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
   const mid = (t1, t2) => ({ x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 });
@@ -406,21 +406,23 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
       g.startPan = { ...pan };
       g.startMid = mid(e.touches[0], e.touches[1]);
       g.isPinching = true;
-    } else if (e.touches.length === 1 && userZoom > defaultUserZoom) {
+    } else if (e.touches.length === 1 && userZoom > initialUserZoom) {
       const d = dragRef.current;
       d.dragging = true;
       d.startX = e.touches[0].clientX;
       d.startY = e.touches[0].clientY;
       d.startPan = { ...pan };
     }
-  }, [defaultUserZoom, userZoom, pan]);
+  }, [initialUserZoom, userZoom, pan]);
+
+  const isMapTransformed = userZoom > initialUserZoom || pan.x !== 0 || pan.y !== 0;
 
   const handleTouchMove = useCallback((e) => {
     if (e.touches.length === 2 && gestureRef.current.isPinching) {
       e.preventDefault();
       const g = gestureRef.current;
       const newDist = dist(e.touches[0], e.touches[1]);
-      const newZoom = Math.max(defaultUserZoom, Math.min(4, g.startZoom * (newDist / g.startDist)));
+      const newZoom = Math.max(initialUserZoom, Math.min(4, g.startZoom * (newDist / g.startDist)));
       const newMid = mid(e.touches[0], e.touches[1]);
       const dx = (newMid.x - g.startMid.x) / baseScale;
       const dy = (newMid.y - g.startMid.y) / baseScale;
@@ -433,7 +435,7 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
       const dy = (e.touches[0].clientY - d.startY) / baseScale;
       setPan(clampPan(d.startPan.x + dx, d.startPan.y + dy, userZoom));
     }
-  }, [baseScale, defaultUserZoom, userZoom, clampPan]);
+  }, [baseScale, initialUserZoom, userZoom, clampPan]);
 
   const handleTouchEnd = useCallback((e) => {
     if (e.touches.length < 2) gestureRef.current.isPinching = false;
@@ -441,13 +443,13 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
     // Double-tap to reset zoom
     if (e.touches.length === 0 && e.changedTouches.length === 1) {
       const now = Date.now();
-      if (now - gestureRef.current.lastTap < 300 && (userZoom > defaultUserZoom || pan.x !== 0 || pan.y !== 0)) {
-        setUserZoom(defaultUserZoom);
+      if (now - gestureRef.current.lastTap < 300 && isMapTransformed) {
+        setUserZoom(initialUserZoom);
         setPan({ x: 0, y: 0 });
       }
       gestureRef.current.lastTap = now;
     }
-  }, [defaultUserZoom, pan.x, pan.y, userZoom]);
+  }, [initialUserZoom, isMapTransformed]);
 
   const isMobile = baseScale < 0.75;
   const pinR_base = isMobile ? 15 : 11;
@@ -456,11 +458,11 @@ function MapView({ items, ps, onPin, hl, fb, gm, viewport, lines = [] }) {
   const fontSize_hl = isMobile ? 14 : 11;
 
   return (
-    <div ref={containerRef} style={{ position: "relative", width: "100%", overflow: "hidden", borderRadius: 12, background: "#e8f0f8", touchAction: userZoom > defaultUserZoom ? "none" : "pan-y" }}
+    <div ref={containerRef} style={{ position: "relative", width: "100%", overflow: "hidden", borderRadius: 12, background: "#e8f0f8", touchAction: userZoom > initialUserZoom ? "none" : "pan-y" }}
       onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-      {(userZoom > defaultUserZoom || pan.x !== 0 || pan.y !== 0) && (
+      {isMapTransformed && (
         <div style={{ position: "absolute", top: 6, right: 6, zIndex: 5, display: "flex", gap: 4 }}>
-          <button onClick={() => { setUserZoom(defaultUserZoom); setPan({ x: 0, y: 0 }); }}
+          <button onClick={() => { setUserZoom(initialUserZoom); setPan({ x: 0, y: 0 }); }}
             style={{ background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: 8, padding: "4px 8px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Fredoka',sans-serif" }}>
             {"\u21BA"} Reset zoom
           </button>
